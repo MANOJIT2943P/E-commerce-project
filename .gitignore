@@ -1,0 +1,81 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Directories to ignore
+Product_db/
+
+# ==================== Node.js ====================
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Production builds
+dist/
+build/
+.next/
+out/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+*.iml
+
+# OS specific files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# ==================== Python ====================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+.env_venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# pytest cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IPython / Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# ==================== Build & Logs ====================
+*.log
+logs/
+lerna-debug.log*
+
+# ==================== OS & Temporary ====================
+*.bak
+*.tmp
+.cache/
+.temp/
+
+# ==================== Project Specific ====================
+# Cloudinary uploads (if using local caching)
+.cloudinary_cache/
