@@ -12,6 +12,8 @@ import Home from './pages/Home';
 import Products from './pages/Products';
 import Login from './pages/Login';
 import ProductView from './pages/ProductView';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 // Auth initializer component
 function AuthInitializer({ children }) {
@@ -64,6 +66,8 @@ function App() {
               <Route path="/products" element={<Products />} />
               <Route path="/login" element={<Login />} />
               <Route path="/products/:id" element={<ProductView />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               {/* Add more routes as needed */}
             </Routes>
           </AuthInitializer>
