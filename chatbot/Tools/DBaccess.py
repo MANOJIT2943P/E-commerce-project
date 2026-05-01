@@ -9,13 +9,13 @@ products=db['Products']
 
 def get_product_info(product_name: str) -> str:
 
-    result=products.find_one({"name":product_name})
+    # result=products.find_one({"name":product_name})
 
-    if(result):
-        return f"Product: {result['name']}\nPrice: ${result['price']}\nFeatures: {result['description']}\nStocks available: {result['stock']}"
-    else:
-        return 'Sorry, Product is not found!!'
-    # return 'yes product available'
+    # if(result):
+    #     return f"Product: {result['name']}\nPrice: ${result['price']}\nFeatures: {result['description']}\nStocks available: {result['stock']}"
+    # else:
+    #     return 'Sorry, Product is not found!!'
+     return 'yes product available'
 
 
 def get_order_info(orderID: int)->str:
@@ -26,4 +26,4 @@ def get_order_info(orderID: int)->str:
     #     return f"Your orderID: {result['user_id']}Total amount: ${result['Total_amount']}\nCurrent Status: ${result['status']}"
     # else:
     #     return 'Sorry, OrderID is not found!!'
-    return 'yes order available'
+    return 'your order is shipped and will be delivered in 3 days!!'

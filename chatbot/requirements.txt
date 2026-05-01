@@ -5,7 +5,9 @@ langchain
 langchain-community
 langchain-core
 langchain-huggingface
+langchain-openai
 faiss-cpu
 pymongo
 huggingface-hub
 sentence-transformers
+python-dotenv

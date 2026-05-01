@@ -1,0 +1,51 @@
+﻿content,Answer
+"Hi, I need help","Hello! Welcome. I'm here to assist you with orders, returns, payments, and more. How can I help you today?"
+How can I return my Item?,"You can return eligible items within 30 days of delivery. Go to My Orders, select the item, and click 'Return'. A prepaid return label will be emailed to you within 24 hours."
+How do I cancel my order?,"You can cancel your order from the 'My Orders' section within 1 hour of placing it, as long as it hasn't been shipped. After dispatch, please refuse delivery or raise a return request."
+I forgot my password,No problem! Click 'Forgot Password' on the login page and enter your registered email. A secure reset link will be sent to your inbox within a few minutes. Please check your spam folder if you don't see it.
+How long will delivery take?,"Delivery typically takes 3–5 business days for standard shipping and 1–2 business days for express shipping, depending on your location. You'll receive a tracking link once your order is dispatched."
+Can I change my delivery address?,"Yes! You can update your delivery address before the order is shipped. Go to My Orders, select the order, and click 'Edit Address'. Once the order is dispatched, the address cannot be changed."
+How long does a refund take?,Refunds are processed within 5–7 business days after we receive and inspect your returned item. The amount is credited to your original payment method. UPI or wallet refunds may reflect sooner.
+How to provide an alternate contact number for delivery?,"You can update your contact number before the order is shipped. Go to My Orders, select the order, and click 'Edit Contact'. Our delivery partner will use this number to coordinate the delivery."
+Can I provide a specific time for my delivery?,"Yes! You can set a preferred delivery date and time slot during checkout under 'Delivery Preferences'. For already placed orders, update it in My Orders before the order is dispatched."
+Can you track my order please?,Track Order
+Can you have xyz product in your stock,Get Product
+Where is my order?,Track Order
+What is the status of my shipment?,Track Order
+Has my order been dispatched yet?,Track Order
+Show me details of this product,Get Product
+I want to see product information,Get Product
+Tell me more about this item,Get Product
+What is your return policy?,"We offer a 30-day hassle-free return policy. Items must be unused, unwashed, and in their original packaging with tags intact. Once received, refunds are processed within 5–7 business days."
+Can I exchange a product?,"Yes! You can exchange a product within 30 days of delivery. Go to My Orders, select the item, and choose 'Exchange'. Pick your preferred size or color and we'll ship the replacement once we receive the original."
+What payment methods do you accept?,"We accept all major credit/debit cards (Visa, Mastercard, Amex), UPI, Net Banking, PayPal, and Buy Now Pay Later options. All transactions are secured with 256-bit SSL encryption."
+Is it safe to enter my card details on your site?,"Absolutely. Our platform is PCI-DSS compliant and uses end-to-end encryption. Your card details are never stored on our servers, ensuring complete security for every transaction."
+How do I apply a coupon code?,"On the checkout page, enter your coupon code in the 'Apply Coupon' field and click 'Apply'. The discount will be reflected in your order total immediately. Only one coupon can be used per order."
+My coupon code is not working,"Please ensure the code is spelled correctly and hasn't expired. Some coupons are valid only on specific categories or above a minimum order value. If the issue persists, our support team will be happy to help."
+Do you offer free shipping?,"Yes! Enjoy free standard shipping on all orders above ₹499. For orders below this amount, a nominal shipping fee is calculated based on your location and displayed clearly at checkout."
+Do you ship internationally?,"Yes, we ship to over 50 countries. International delivery takes 7–14 business days. Shipping charges and any applicable customs duties are calculated at checkout and are the buyer's responsibility."
+What if I receive a damaged item?,"We sincerely apologize! Please photograph the damaged item and packaging, then contact us within 48 hours of delivery via chat or email. We'll arrange a free replacement or issue a full refund right away."
+I received the wrong product,We're sorry for the inconvenience! Please share a photo of the incorrect item along with your order ID. We'll dispatch the correct product immediately and arrange a free return pickup at no extra cost.
+How do I create an account?,"Click 'Sign Up' at the top right, enter your name, email, and password. You can also register instantly using your Google or Facebook account. It only takes a minute!"
+How do I update my profile information?,"Go to My Account > Profile Settings to update your name, email, phone number, or password. Changes are saved instantly. For email changes, a verification link will be sent to your new address."
+Can I save multiple delivery addresses?,"Yes! Go to My Account > Address Book to add, edit, or remove addresses. You can save multiple addresses and select your preferred one during checkout for a faster experience."
+How do I save a product to buy later?,Click the heart icon on any product page to add it to your Wishlist. Access your Wishlist anytime from My Account. Items in your Wishlist can be moved to your cart with a single click when you're ready to buy.
+Is the product I want available in my area?,"Enter your pincode on the product page to check delivery availability and estimated arrival time in your area. If the product is unavailable, click 'Notify Me' to get an alert when it's back in stock."
+How do I contact customer support?,"You can reach us via 24/7 live chat, email at support@store.com, or our helpline 1800-XXX-XXXX (Mon–Sat, 9 AM–7 PM). We aim to respond to all queries within 4 business hours."
+Do you have a live chat option?,Yes! Our live chat is available 24/7. Click the chat icon at the bottom right of any page to connect with a support agent instantly or get help from our automated assistant.
+How do I pay using EMI?,"At checkout, select 'Pay via EMI' under Payment Methods. Choose your bank and preferred tenure (3, 6, or 12 months). The applicable EMI amount and any processing charges are displayed clearly before you confirm."
+Are your products genuine and authentic?,"Yes, 100%! We source directly from authorized brands and certified distributors. Every product comes with an authenticity guarantee. If you ever have concerns, please reach out and we'll verify it for you."
+Do you offer gift wrapping?,"Yes! During checkout, select 'Gift Wrap' and add a personalized message. The invoice will be excluded from the package. Gift wrapping is available for a small additional fee and is beautifully done."
+How do I purchase a gift card?,"Visit the Gift Cards section on our website, choose a denomination, and enter the recipient's email. The gift card is delivered digitally within minutes and is valid for 12 months from the date of purchase."
+How do I redeem a gift card?,"At checkout, click 'Pay with Gift Card' and enter your gift card code. The balance is deducted from your order total. If the order exceeds the gift card value, you can pay the remaining amount using another method."
+What are your customer support hours?,"Our store is open 24/7 online. Live chat support is available around the clock, and phone support runs Monday to Saturday, 9 AM to 7 PM. Email queries are answered within 4 business hours."
+How do I unsubscribe from promotional emails?,"Click 'Unsubscribe' at the bottom of any promotional email, or go to My Account > Notification Preferences and uncheck 'Promotional Emails'. You'll still receive important order and account emails."
+Is my personal data safe with you?,"Yes, your privacy is our priority. We are fully GDPR-compliant and use advanced encryption to protect your data. We never sell your information to third parties. You may request data deletion anytime from your account settings."
+Do you price match with other stores?,"Yes! If you find the same product at a lower price on a verified competitor's website within 7 days of purchase, contact us with the link. We'll review it and match the price or refund the difference."
+How do I leave a product review?,"After delivery, you'll receive an email prompt to review your purchase. You can also go to My Orders > Select the item > Write a Review. Your honest feedback helps the community make better decisions!"
+Can I track my order without logging in?,Yes! Use the 'Track Order' option on our website and enter your Order ID along with the registered email or phone number. You'll get real-time updates on your shipment without needing to log in.
+What happens if I miss my delivery?,"If you miss a delivery, our courier partner will make up to 3 delivery attempts. After that, the package is held at the local facility for 5 days. You can reschedule by contacting us or using the tracking link in your email."
+Can I order without creating an account?,"Yes! You can place an order as a guest using just your email and delivery details. However, creating an account lets you track orders, manage returns, and enjoy a faster checkout experience."
+How do I use Buy Now Pay Later?,"At checkout, select your preferred BNPL provider (e.g., Klarna, LazyPay, or Simpl). Log in or sign up with them, choose your repayment plan, and complete the purchase. No hidden charges — all terms are shown upfront."
+Do you have a loyalty or rewards program?,Yes! Every purchase earns you reward points. You can redeem these points for discounts on future orders. Go to My Account > Rewards to check your balance and see exclusive member-only offers.
+How do I know if my payment was successful?,"Once your payment is processed, you will receive an order confirmation email and SMS with your Order ID within a few minutes. You can also check the order status in My Orders. If your amount was debited but no confirmation arrived, please contact our support team immediately."
