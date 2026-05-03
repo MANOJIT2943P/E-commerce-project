@@ -83,11 +83,15 @@ async def chat(req: ChatRequest):
         similarity_threshold = 0.5  # Adjust this threshold as needed
         
         if results_with_scores and len(results_with_scores) > 0:
-            result_doc, similarity_score = results_with_scores[0]
+            result_doc, distance_score = results_with_scores[0]
+
+            # Convert L2 distance → similarity score (0 to 1)
+            similarity_score = 1 / (1 + distance_score)
+
+            print(f"Distance: {distance_score:.6f} | Similarity: {similarity_score:.4f}")
             
             # Check if similarity score meets threshold
             if similarity_score >= similarity_threshold:
-                print("done1",similarity_score)
                 isContext = True
                 answer_type = result_doc.metadata.get('Answer', '')
                 context_content = result_doc.page_content
@@ -95,24 +99,25 @@ async def chat(req: ChatRequest):
                 # Check for specific answer types that need follow-up
                 if answer_type == 'Track Order':
                     user_context[user_id] = {'type': 'order'}
-                    return {"response": "Please provide your order ID.", "isContext": True}
+                    return {"response": "Please provide your order ID.", "type": "text"}
                 
                 elif answer_type == 'Get Product':
                     user_context[user_id] = {'type': 'product'}
-                    return {"response": "Please provide the product name.", "isContext": True}
+                    return {"response": "Please provide the product name.", "type": "text"}
                 
                 # For other contexts, use LLM with the normal prompt template
                 else:
                     llm_prompt = normal.format(user_query=msg, context=context_content, support_email=SUPPORT_EMAIL, support_phone=SUPPORT_PHONE)
                     llm_response = llm.invoke(llm_prompt)
-                    response_text = parser.parse(llm_response)
-                    return {"response": response_text, "isContext": True}
+                    response_text = llm_response.content
+                    return {"response": response_text, "type": "text"}
         
         # No context found - return user-friendly message using fallback prompt
         if not isContext:
-            fallback_response = fallback.format(SUPPORT_EMAIL=SUPPORT_EMAIL)
-            return {"response": fallback_response, "isContext": False}
+            fallback_prompt = fallback.format(user_query=msg,support_email=SUPPORT_EMAIL,support_phone=SUPPORT_PHONE)
+            fallback_response = llm.invoke(fallback_prompt).content
+            return {"response": fallback_response, "type": "text"}
     
     except Exception as e:
         error_response = f"An error occurred while processing your request: {str(e)}"
-        return {"response": error_response, "isContext": False}
+        return {"response": error_response, "type": "text"}

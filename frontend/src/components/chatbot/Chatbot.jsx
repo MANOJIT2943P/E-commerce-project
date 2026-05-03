@@ -9,7 +9,7 @@ const Chatbot = () => {
   const dispatch = useDispatch();
   const { isOpen, messages, isTyping } = useSelector((state) => state.chatbot);
   const [inputMessage, setInputMessage] = useState('');
-  const [backendStatus, setBackendStatus] = useState(false);
+  const [backendStatus, setBackendStatus] = useState(true); //earlier false
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -20,16 +20,16 @@ const Chatbot = () => {
     scrollToBottom();
   }, [messages, isTyping, isOpen]);
 
-  useEffect(() => {
-    const checkBackendStatus = async () => {
-      const status = await chatbotService.checkBackendStatus();
-      setBackendStatus(status);
-    };
+  // useEffect(() => {
+  //   const checkBackendStatus = async () => {
+  //     const status = await chatbotService.checkBackendStatus();
+  //     setBackendStatus(status);
+  //   };
     
-    checkBackendStatus();
-    const interval = setInterval(checkBackendStatus, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  //   checkBackendStatus();
+  //   const interval = setInterval(checkBackendStatus, 30000);
+  //   return () => clearInterval(interval);
+  // }, []);
 
   const handleSendMessage = async (message) => {
     const messageToSend = message || inputMessage.trim();
