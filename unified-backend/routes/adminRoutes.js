@@ -6,6 +6,8 @@
 
 import express from 'express';
 import * as adminProductController from '../controllers/adminController/adminProductController.js';
+import { createAdmin } from '../controllers/adminController/adminUserController.js';
+import { registerValidation } from '../controllers/authController.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { requireAdmin } from '../middleware/rbac.js';
 import { handleMulterError, uploadImage } from '../middleware/upload.js';
@@ -61,6 +63,18 @@ router.post(
   handleMulterError,
   adminProductController.validateProductInput,
   adminProductController.createProductAdmin
+);
+
+/**
+ * @route   POST /api/admin/users/register
+ * @desc    Register a new admin user
+ * @access  Private (ADMIN only)
+ * @body    name, email, password, confirmPassword
+ */
+router.post(
+  '/users/register',
+  registerValidation,
+  createAdmin
 );
 
 /**

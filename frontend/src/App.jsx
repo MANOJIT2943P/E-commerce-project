@@ -6,6 +6,7 @@ import { store } from './store/store';
 import { initializeAuth, initializeAuthSuccess, initializeAuthFailure } from './store/slices/authSlice';
 import { authService } from './services/authService';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ProtectedAdminRoute from './components/common/ProtectedAdminRoute';
 
 // Pages
 import Home from './pages/Home';
@@ -14,6 +15,12 @@ import Login from './pages/Login';
 import ProductView from './pages/ProductView';
 import About from './pages/About';
 import Contact from './pages/Contact';
+
+// Admin Pages
+import AdminDashboard from './pages/AdminDashboard';
+import AdminProducts from './pages/AdminProducts';
+import AdminStats from './pages/AdminStats';
+import AdminRegister from './pages/AdminRegister';
 
 // Auth initializer component
 function AuthInitializer({ children }) {
@@ -68,7 +75,40 @@ function App() {
               <Route path="/products/:id" element={<ProductView />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
-              {/* Add more routes as needed */}
+              
+              {/* Admin Routes - Protected */}
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminDashboard />
+                  </ProtectedAdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/products" 
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminProducts />
+                  </ProtectedAdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/stats" 
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminStats />
+                  </ProtectedAdminRoute>
+                } 
+              />
+              <Route 
+                path="/admin/register" 
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminRegister />
+                  </ProtectedAdminRoute>
+                } 
+              />
             </Routes>
           </AuthInitializer>
         </Router>

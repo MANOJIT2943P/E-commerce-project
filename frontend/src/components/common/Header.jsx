@@ -248,14 +248,14 @@ const Header = () => {
                         <Heart className="w-4 h-4" />
                         <span>Wishlist</span>
                       </Link>
-                      {user.role === 'admin' && (
+                      {user.role === 'ADMIN' && (
                         <Link
                           to="/admin"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700"
                         >
                           <Settings className="w-4 h-4" />
-                          <span>Admin Dashboard</span>
+                          <span>Admin Panel</span>
                         </Link>
                       )}
                       <hr className="my-1 border-gray-200 dark:border-gray-700" />

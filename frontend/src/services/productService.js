@@ -3,7 +3,7 @@ import api from './api';
 const placeholderImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23ddd'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='24'>Product</text></svg>";
 
 // Build image URLs from API base when DB stores filenames.
-export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const mapProduct = (p) => {
   let images = [];
