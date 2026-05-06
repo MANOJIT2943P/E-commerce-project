@@ -10,7 +10,7 @@ const ProductCard = ({ product, viewMode }) => {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     addItem({
       id: product.id,
       name: product.name,
@@ -71,7 +71,7 @@ const ProductCard = ({ product, viewMode }) => {
                       ({product.reviewCount} reviews)
                     </span>
                   </div>
-                  
+
                   {product.inStock ? (
                     <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                       In Stock
@@ -94,7 +94,7 @@ const ProductCard = ({ product, viewMode }) => {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <button
                       className="p-2 text-gray-400 hover:text-red-500 transition-colors"
@@ -138,7 +138,7 @@ const ProductCard = ({ product, viewMode }) => {
             className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
           />
         </Link>
-        
+
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
           <button
@@ -217,7 +217,7 @@ const ProductCard = ({ product, viewMode }) => {
               </span>
             )}
           </div>
-          
+
           <button
             onClick={handleAddToCart}
             disabled={!product.inStock}

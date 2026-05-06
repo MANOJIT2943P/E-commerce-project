@@ -13,7 +13,7 @@ const Login = () => {
   const { login, register, isLoading, error, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const from = location.state?.from?.pathname || '/';
 
   const loginForm = useForm();
@@ -57,6 +57,7 @@ const Login = () => {
         name: data.name || data.username,
         email: data.email,
         password: data.password,
+        confirmPassword: data.confirmPassword,
       });
       toast.success('Account created successfully!');
       navigate(from, { replace: true });
@@ -90,7 +91,7 @@ const Login = () => {
               </div>
               <span className="text-2xl font-bold text-gray-900 dark:text-white">ShopEase</span>
             </Link>
-            
+
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
               {isLogin ? 'Sign in to your account' : 'Create your account'}
             </h2>
@@ -347,7 +348,7 @@ const Login = () => {
                 </div>
 
                 {/* Add Username Field */}
-                
+
               </div>
 
               <div className="flex items-center">

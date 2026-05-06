@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star, ShoppingCart, Heart, Eye } from 'lucide-react';
-import { productService } from '../../services/productService';
+import { productService, API_HOST } from '../../services/productService';
 import { recommendService } from '../../services/recommendService';
 import { useCart } from '../../hooks/useCart';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -17,25 +17,19 @@ const FeaturedProducts = () => {
       try {
         // Try to fetch recommended products for a popular seed
         const recommended = await recommendService.getRecommendations('iPhone');
-        // Pull full product list to enrich recommended items
-        const allProducts = await productService.getProducts();
-
         const mapped = recommended.map((r) => {
-          const match = allProducts.find(
-            (p) => p.name?.toLowerCase().includes(r.name?.toLowerCase())
-          );
-          if (match) return match;
           return {
             id: r.uid,
             name: r.name,
-            price: r.original_price,
+            price: r.original_price, // the recommend service returns original_price
             originalPrice: r.original_price,
-            rating: r.rating,
-            brand: 'Recommended',
-            description: 'Recommended product',
+            rating: r.rating || 4.5,
+            brand: r.brand || 'Recommended',
+            description: r.description || 'Special featured product recommended for you.',
             images: [
-              "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23ddd'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='24'>Product</text></svg>"
+              `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(r.uid)}.jpg`
             ],
+            isRecommended: true
           };
         });
 
@@ -110,7 +104,7 @@ const FeaturedProducts = () => {
                   alt={product.name}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                
+
                 {/* Overlay Actions */}
                 <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
                   <button
@@ -181,7 +175,7 @@ const FeaturedProducts = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   <button
                     onClick={() => handleAddToCart(product)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
