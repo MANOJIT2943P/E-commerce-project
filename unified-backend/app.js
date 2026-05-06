@@ -1,6 +1,7 @@
 /**
  * Main app configuration and setup
  * Initializes express app with middleware and routes
+ * ✅ REFACTORED: Added local image serving to replace Cloudinary
  */
 
 import cookieParser from 'cookie-parser';
@@ -46,6 +47,19 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // ==========================================
+// Static File Serving (Local Images)
+// ==========================================
+// ✅ REFACTORED: Serve product images from local storage
+const PRODUCT_IMAGES_DIR = 'D:\\col pro ep\\E-commerce-project\\Product_db';
+app.use('/images', express.static(PRODUCT_IMAGES_DIR, {
+  maxAge: '1d', // Cache images for 1 day in browser
+  etag: false   // Disable ETags for simpler caching
+}));
+
+console.log(`📁 Image directory configured: ${PRODUCT_IMAGES_DIR}`);
+console.log(`🖼️  Images accessible at: http://localhost:<port>/images/<filename>`);
+
+// ==========================================
 // Request Logging (Development)
 // ==========================================
 if (process.env.NODE_ENV === 'development') {
@@ -72,9 +86,13 @@ app.get('/health', (req, res) => {
 // ==========================================
 import adminRoutes from './routes/adminRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes); // Public product routes (NO AUTH REQUIRED)
+app.use('/api/cart', cartRoutes); // Protected cart routes (AUTHENTICATED USERS ONLY)
+app.use('/api/admin', adminRoutes); // Protected admin routes (ADMIN ONLY)
 
 // ==========================================
 // 404 Handler

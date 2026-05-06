@@ -2,16 +2,17 @@
  * Admin Product Controller
  * Handles admin-exclusive product management
  * Includes inventory management, stock updates, and product CRUD
+ * ✅ REFACTORED: Cloudinary replaced with local file storage
  */
 
 import { body, validationResult } from 'express-validator';
 import { PRODUCT_MESSAGES, STOCK_MESSAGES } from '../../constants/messages.js';
-import { cleanupTempFile } from '../../middleware/upload.js';
+import { deleteUploadedFile } from '../../middleware/upload.js';
 import Product from '../../models/Product.js';
 import {
-    deleteFromCloudinary,
-    uploadToCloudinary
-} from '../../utils/cloudinaryUtils.js';
+    deleteLocalImage,
+    handleLocalUpload
+} from '../../utils/localImageUtils.js';
 
 /**
  * GET /api/admin/products
@@ -126,15 +127,15 @@ export const getProductStock = async (req, res) => {
  * Accepts: application/json OR multipart/form-data
  */
 export const createProductAdmin = async (req, res) => {
-  let tempFilePath = null;
+  let uploadedFile = null;
 
   try {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // Cleanup uploaded file if validation fails
+      // Delete uploaded file if validation fails
       if (req.file) {
-        await cleanupTempFile(req.file.path);
+        await deleteUploadedFile(req.file.filename);
       }
       return res.status(400).json({
         success: false,
@@ -144,7 +145,7 @@ export const createProductAdmin = async (req, res) => {
     }
 
     const { name, description, price, category, brand, stock, images } = req.body;
-    tempFilePath = req.file?.path;
+    uploadedFile = req.file;
 
     // Initialize product data
     const productData = {
@@ -160,30 +161,22 @@ export const createProductAdmin = async (req, res) => {
     };
 
     // Handle image upload if file is provided
-    if (tempFilePath) {
-      const uploadResult = await uploadToCloudinary(tempFilePath, {
-        folder: 'products',
-        tags: ['product-primary', name]
-      });
+    // Images are automatically moved to Product_db by multer
+    if (uploadedFile) {
+      const uploadResult = await handleLocalUpload(uploadedFile);
 
       if (uploadResult.success) {
-        productData.imageUrl = uploadResult.secure_url;
-        productData.imagePublicId = uploadResult.public_id;
-        console.log(`✅ Image uploaded: ${uploadResult.secure_url}`);
+        productData.imageUrl = uploadResult.imagePath;
+        console.log(`✅ Image stored locally: ${uploadResult.imagePath}`);
       } else {
         // Log error but continue - image failure shouldn't block product creation
-        console.error(`⚠️ Image upload failed: ${uploadResult.message}`);
+        console.error(`⚠️ Image storage failed: ${uploadResult.message}`);
       }
     }
 
     // Create product
     const product = new Product(productData);
     await product.save();
-
-    // Cleanup temp file
-    if (tempFilePath) {
-      await cleanupTempFile(tempFilePath);
-    }
 
     res.status(201).json({
       success: true,
@@ -192,8 +185,8 @@ export const createProductAdmin = async (req, res) => {
     });
   } catch (error) {
     // Cleanup on error
-    if (tempFilePath) {
-      await cleanupTempFile(tempFilePath);
+    if (uploadedFile) {
+      await deleteUploadedFile(uploadedFile.filename);
     }
 
     console.error('Create product error:', error);
@@ -209,15 +202,15 @@ export const createProductAdmin = async (req, res) => {
  * Update product details with optional image replacement
  */
 export const updateProductAdmin = async (req, res) => {
-  let tempFilePath = null;
+  let uploadedFile = null;
 
   try {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      // Cleanup uploaded file if validation fails
+      // Delete uploaded file if validation fails
       if (req.file) {
-        await cleanupTempFile(req.file.path);
+        await deleteUploadedFile(req.file.filename);
       }
       return res.status(400).json({
         success: false,
@@ -227,14 +220,14 @@ export const updateProductAdmin = async (req, res) => {
     }
 
     const { name, description, price, category, brand, images, isActive, deleteImage } = req.body;
-    tempFilePath = req.file?.path;
+    uploadedFile = req.file;
 
     // Get existing product to check for old image
     const existingProduct = await Product.findById(req.params.id);
     if (!existingProduct) {
       // Cleanup if product not found
-      if (tempFilePath) {
-        await cleanupTempFile(tempFilePath);
+      if (uploadedFile) {
+        await deleteUploadedFile(uploadedFile.filename);
       }
       return res.status(404).json({
         success: false,
@@ -255,32 +248,27 @@ export const updateProductAdmin = async (req, res) => {
     };
 
     // Handle image deletion request
-    if (deleteImage === 'true' && existingProduct.imagePublicId) {
-      await deleteFromCloudinary(existingProduct.imagePublicId);
+    if (deleteImage === 'true' && existingProduct.imageUrl) {
+      await deleteLocalImage(existingProduct.imageUrl);
       updateData.imageUrl = null;
-      updateData.imagePublicId = null;
-      console.log(`✅ Image deleted: ${existingProduct.imagePublicId}`);
+      console.log(`✅ Image deleted: ${existingProduct.imageUrl}`);
     }
 
     // Handle new image upload
-    if (tempFilePath) {
+    if (uploadedFile) {
       // Delete old image if exists
-      if (existingProduct.imagePublicId) {
-        await deleteFromCloudinary(existingProduct.imagePublicId);
+      if (existingProduct.imageUrl) {
+        await deleteLocalImage(existingProduct.imageUrl);
       }
 
-      // Upload new image
-      const uploadResult = await uploadToCloudinary(tempFilePath, {
-        folder: 'products',
-        tags: ['product-primary', name || existingProduct.name]
-      });
+      // Process new image (already moved to Product_db by multer)
+      const uploadResult = await handleLocalUpload(uploadedFile);
 
       if (uploadResult.success) {
-        updateData.imageUrl = uploadResult.secure_url;
-        updateData.imagePublicId = uploadResult.public_id;
-        console.log(`✅ Image updated: ${uploadResult.secure_url}`);
+        updateData.imageUrl = uploadResult.imagePath;
+        console.log(`✅ Image updated: ${uploadResult.imagePath}`);
       } else {
-        console.error(`⚠️ Image upload failed: ${uploadResult.message}`);
+        console.error(`⚠️ Image storage failed: ${uploadResult.message}`);
       }
     }
 
@@ -290,11 +278,6 @@ export const updateProductAdmin = async (req, res) => {
       runValidators: true
     });
 
-    // Cleanup temp file
-    if (tempFilePath) {
-      await cleanupTempFile(tempFilePath);
-    }
-
     res.status(200).json({
       success: true,
       message: PRODUCT_MESSAGES.PRODUCT_UPDATED,
@@ -302,8 +285,8 @@ export const updateProductAdmin = async (req, res) => {
     });
   } catch (error) {
     // Cleanup on error
-    if (tempFilePath) {
-      await cleanupTempFile(tempFilePath);
+    if (uploadedFile) {
+      await deleteUploadedFile(uploadedFile.filename);
     }
 
     console.error('Update product error:', error);
@@ -329,10 +312,10 @@ export const deleteProductAdmin = async (req, res) => {
       });
     }
 
-    // Delete associated image from Cloudinary
-    if (product.imagePublicId) {
-      await deleteFromCloudinary(product.imagePublicId);
-      console.log(`✅ Product image deleted from Cloudinary: ${product.imagePublicId}`);
+    // Delete associated image from local storage
+    if (product.imageUrl) {
+      await deleteLocalImage(product.imageUrl);
+      console.log(`✅ Product image deleted: ${product.imageUrl}`);
     }
 
     // Soft delete - set isActive to false

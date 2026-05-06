@@ -63,19 +63,13 @@ const productSchema = new mongoose.Schema(
       default: []
     },
 
-    // Primary Product Image (Cloudinary URL)
+    // Primary Product Image (Local storage path)
+    // ✅ REFACTORED: Changed from Cloudinary URL to local path
     imageUrl: {
       type: String,
       trim: true,
       default: null,
-      description: 'Primary product image URL from Cloudinary'
-    },
-
-    // Cloudinary Public ID for image management
-    imagePublicId: {
-      type: String,
-      default: null,
-      description: 'Cloudinary public_id for managing image deletion'
+      description: 'Local image path (e.g., /images/product_<uuid>.jpg)'
     },
 
     // Additional metadata

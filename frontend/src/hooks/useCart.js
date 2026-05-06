@@ -1,29 +1,44 @@
-import { useSelector, useDispatch } from 'react-redux';
-import { addToCart, removeFromCart, updateQuantity, clearCart, toggleCart, calculateTotals } from '../store/slices/cartSlice';
 import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+    addToCartAsync,
+    clearCartAsync,
+    fetchCart,
+    removeFromCartAsync,
+    toggleCart,
+    updateCartItemAsync
+} from '../store/slices/cartSlice';
 
 export const useCart = () => {
   const dispatch = useDispatch();
-  const { items, total, itemCount, isOpen } = useSelector((state) => state.cart);
+  const { items, totals, isOpen, loading, error } = useSelector((state) => state.cart);
+  const { token, user } = useSelector((state) => state.auth);
 
+  // Fetch cart when user logs in or component mounts
   useEffect(() => {
-    dispatch(calculateTotals());
-  }, [items, dispatch]);
+    if (token && user) {
+      dispatch(fetchCart());
+    }
+  }, [token, user, dispatch]);
 
-  const addItem = (item) => {
-    dispatch(addToCart(item));
+  const addItem = (productId, quantity = 1) => {
+    dispatch(addToCartAsync({ productId, quantity }));
   };
 
-  const removeItem = (id, size, color) => {
-    dispatch(removeFromCart({ id, size, color }));
+  const removeItem = (productId) => {
+    dispatch(removeFromCartAsync(productId));
   };
 
-  const updateItemQuantity = (id, quantity, size, color) => {
-    dispatch(updateQuantity({ id, quantity, size, color }));
+  const updateItemQuantity = (productId, quantity) => {
+    if (quantity <= 0) {
+      dispatch(removeFromCartAsync(productId));
+    } else {
+      dispatch(updateCartItemAsync({ productId, quantity }));
+    }
   };
 
   const clear = () => {
-    dispatch(clearCart());
+    dispatch(clearCartAsync());
   };
 
   const toggle = () => {
@@ -32,9 +47,12 @@ export const useCart = () => {
 
   return {
     items,
-    total,
-    itemCount,
+    totals,
+    itemCount: totals.itemCount,
+    total: totals.totalPrice,
     isOpen,
+    loading,
+    error,
     addItem,
     removeItem,
     updateItemQuantity,

@@ -143,8 +143,8 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "john@example.com",
-  "password": "SecurePass123"
+  "email": "test@ecommerce.com",
+  "password": "AdminPass123"
 }
 ```
 

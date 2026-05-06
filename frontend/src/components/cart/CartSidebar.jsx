@@ -1,24 +1,46 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
-import { toggleCart, updateQuantity, removeFromCart } from '../../store/slices/cartSlice';
-import { motion, AnimatePresence } from 'framer-motion';
+import {
+    clearCartAsync,
+    fetchCart,
+    removeFromCartAsync,
+    toggleCart,
+    updateCartItemAsync
+} from '../../store/slices/cartSlice';
 
 const CartSidebar = () => {
   const dispatch = useDispatch();
-  const { items, total, itemCount, isOpen } = useSelector((state) => state.cart);
+  const { items, totals, isOpen, loading, error, synced } = useSelector(
+    (state) => state.cart
+  );
+  const { token, user } = useSelector((state) => state.auth);
 
-  const handleUpdateQuantity = (id, quantity, size, color) => {
-    if (quantity <= 0) {
-      dispatch(removeFromCart({ id, size, color }));
+  // Fetch cart when user logs in or component mounts
+  useEffect(() => {
+    if (token && user && !synced) {
+      dispatch(fetchCart());
+    }
+  }, [token, user, synced, dispatch]);
+
+  const handleUpdateQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      dispatch(removeFromCartAsync(productId));
     } else {
-      dispatch(updateQuantity({ id, quantity, size, color }));
+      dispatch(updateCartItemAsync({ productId, quantity: newQuantity }));
     }
   };
 
-  const handleRemoveItem = (id, size, color) => {
-    dispatch(removeFromCart({ id, size, color }));
+  const handleRemoveItem = (productId) => {
+    dispatch(removeFromCartAsync(productId));
+  };
+
+  const handleClearCart = () => {
+    if (window.confirm('Are you sure you want to clear your cart?')) {
+      dispatch(clearCartAsync());
+    }
   };
 
   return (
@@ -45,7 +67,7 @@ const CartSidebar = () => {
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Shopping Cart ({itemCount})
+                Shopping Cart ({totals.itemCount || 0})
               </h2>
               <button
                 onClick={() => dispatch(toggleCart())}
@@ -55,9 +77,23 @@ const CartSidebar = () => {
               </button>
             </div>
 
+            {/* Error Message */}
+            {error && (
+              <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6">
-              {items.length === 0 ? (
+              {loading && !items.length && (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <Loader className="w-8 h-8 animate-spin text-blue-600 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400">Loading cart...</p>
+                </div>
+              )}
+
+              {!loading && items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
                   <ShoppingBag className="w-16 h-16 mb-4" />
                   <h3 className="text-lg font-medium mb-2">Your cart is empty</h3>
@@ -74,7 +110,7 @@ const CartSidebar = () => {
                 <div className="space-y-4">
                   {items.map((item) => (
                     <motion.div
-                      key={`${item.id}-${item.size}-${item.color}`}
+                      key={item.id}
                       layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -83,38 +119,42 @@ const CartSidebar = () => {
                     >
                       {/* Product Image */}
                       <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        src={
+                          item.product.imageUrl
+                            ? `http://localhost:5000${item.product.imageUrl}`
+                            : 'https://via.placeholder.com/64'
+                        }
+                        alt={item.product.name}
+                        className="w-16 h-16 object-cover rounded-lg bg-gray-200 dark:bg-gray-700"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/64';
+                        }}
                       />
 
                       {/* Product Details */}
                       <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                          {item.name}
+                          {item.product.name}
                         </h4>
-                        <div className="flex items-center space-x-2 mt-1">
-                          {item.size && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              Size: {item.size}
-                            </span>
-                          )}
-                          {item.color && (
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                              Color: {item.color}
-                            </span>
-                          )}
-                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
+                          {item.product.category}
+                        </p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                            ${item.price.toFixed(2)}
+                            ${item.product.price.toFixed(2)}
                           </span>
-                          
+
                           {/* Quantity Controls */}
                           <div className="flex items-center space-x-2">
                             <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1, item.size, item.color)}
-                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product.id,
+                                  item.quantity - 1
+                                )
+                              }
+                              disabled={loading}
+                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
@@ -122,19 +162,29 @@ const CartSidebar = () => {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1, item.size, item.color)}
-                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product.id,
+                                  item.quantity + 1
+                                )
+                              }
+                              disabled={loading || item.quantity >= item.product.stock}
+                              className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Subtotal: ${item.subtotal.toFixed(2)}
+                        </p>
                       </div>
 
                       {/* Remove Button */}
                       <button
-                        onClick={() => handleRemoveItem(item.id, item.size, item.color)}
-                        className="p-2 text-red-400 hover:text-red-600 transition-colors"
+                        onClick={() => handleRemoveItem(item.product.id)}
+                        disabled={loading}
+                        className="p-2 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -145,22 +195,22 @@ const CartSidebar = () => {
             </div>
 
             {/* Footer */}
-            {items.length > 0 && (
+            {!loading && items.length > 0 && (
               <div className="border-t border-gray-200 dark:border-gray-700 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-lg font-semibold text-gray-900 dark:text-white">
                     Total:
                   </span>
                   <span className="text-xl font-bold text-gray-900 dark:text-white">
-                    ${total.toFixed(2)}
+                    ${totals.totalPrice.toFixed(2)}
                   </span>
                 </div>
-                
+
                 <div className="space-y-3">
                   <Link
                     to="/checkout"
                     onClick={() => dispatch(toggleCart())}
-                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block"
+                    className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-center block disabled:opacity-50"
                   >
                     Checkout
                   </Link>
@@ -171,8 +221,15 @@ const CartSidebar = () => {
                   >
                     View Cart
                   </Link>
+                  <button
+                    onClick={handleClearCart}
+                    disabled={loading}
+                    className="w-full px-6 py-3 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Clear Cart
+                  </button>
                 </div>
-                
+
                 <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-3">
                   Free shipping on orders over $100
                 </p>

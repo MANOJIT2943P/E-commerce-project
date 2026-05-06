@@ -1,38 +1,47 @@
 /**
  * Image Upload Middleware
  * Handles multipart/form-data parsing and image validation
- * Uses multer for parsing and sharp for image optimization
+ * Local file storage configuration - replaced Cloudinary
  */
 
 import fs from 'fs/promises';
 import multer from 'multer';
-import os from 'os';
 import path from 'path';
 
-// Configuration constants
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const TEMP_UPLOAD_DIR = path.join(os.tmpdir(), 'product-uploads');
+// ==========================================
+// CONFIGURATION CONSTANTS
+// ==========================================
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
+const PRODUCT_IMAGES_DIR = 'D:\\col pro ep\\E-commerce-project\\Product_db';
 
-// Ensure temp directory exists
+// ==========================================
+// CREATE UPLOAD DIRECTORY
+// ==========================================
+// Ensure upload directory exists
 try {
-  await fs.mkdir(TEMP_UPLOAD_DIR, { recursive: true });
+  await fs.mkdir(PRODUCT_IMAGES_DIR, { recursive: true });
+  console.log(`✅ Image storage directory ready: ${PRODUCT_IMAGES_DIR}`);
 } catch (error) {
-  console.error('Failed to create temp upload directory:', error.message);
+  console.error('⚠️ Failed to create image storage directory:', error.message);
 }
 
 /**
  * Multer storage configuration
- * Temporarily stores files in system temp directory
+ * Stores files directly in Product_db directory with unique naming
+ * Uses timestamp + random number to ensure uniqueness
  */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, TEMP_UPLOAD_DIR);
+    cb(null, PRODUCT_IMAGES_DIR);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `product-${uniqueSuffix}${ext}`);
+    // Use timestamp + random suffix for unique naming to prevent collisions
+    const fileExt = path.extname(file.originalname).toLowerCase();
+    const timestamp = Date.now();
+    const randomSuffix = Math.round(Math.random() * 1e9);
+    const uniqueFilename = `product_${timestamp}_${randomSuffix}${fileExt}`;
+    cb(null, uniqueFilename);
   }
 });
 
@@ -41,10 +50,10 @@ const storage = multer.diskStorage({
  * Validates file type and size
  */
 const fileFilter = (req, file, cb) => {
-  // Validate MIME type
+  // Validate MIME type - only allow specific formats
   if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     const error = new Error(
-      `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+      `Invalid file type. Allowed types: JPEG, PNG, WebP`
     );
     error.statusCode = 400;
     return cb(error);
@@ -78,31 +87,32 @@ export const uploadImages = multer({
 }).array('images', 5); // Max 5 images
 
 /**
- * Cleanup temporary uploaded files
- * Should be called after successful Cloudinary upload
+ * Cleanup uploaded file from disk
+ * Called when upload fails or is replaced
  */
-export const cleanupTempFile = async (filepath) => {
+export const deleteUploadedFile = async (filename) => {
   try {
-    if (filepath) {
-      await fs.unlink(filepath);
-    }
+    if (!filename) return;
+    const filepath = path.join(PRODUCT_IMAGES_DIR, filename);
+    await fs.unlink(filepath);
+    console.log(`✅ File deleted: ${filename}`);
   } catch (error) {
-    console.warn(`Failed to cleanup temp file: ${filepath}`, error.message);
+    console.warn(`⚠️ Failed to delete file: ${filename}`, error.message);
     // Don't throw - cleanup failure shouldn't break the operation
   }
 };
 
 /**
- * Cleanup multiple temporary files
+ * Cleanup multiple files from disk
  */
-export const cleanupTempFiles = async (filepaths = []) => {
+export const deleteUploadedFiles = async (filenames = []) => {
   const results = await Promise.allSettled(
-    filepaths.map(fp => cleanupTempFile(fp))
+    filenames.map(fn => deleteUploadedFile(fn))
   );
 
   results.forEach((result, index) => {
     if (result.status === 'rejected') {
-      console.warn(`Failed to cleanup file at index ${index}: ${result.reason}`);
+      console.warn(`⚠️ Failed to delete file at index ${index}`);
     }
   });
 };
@@ -142,4 +152,10 @@ export const handleMulterError = (err, req, res, next) => {
   });
 };
 
-export default { uploadImage, uploadImages, cleanupTempFile, cleanupTempFiles };
+export default { 
+  uploadImage, 
+  uploadImages, 
+  deleteUploadedFile, 
+  deleteUploadedFiles,
+  PRODUCT_IMAGES_DIR
+};
