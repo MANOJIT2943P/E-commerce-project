@@ -26,7 +26,11 @@ const productSlice = createSlice({
   reducers: {
     setProducts: (state, action) => {
       state.products = action.payload;
-      state.filteredProducts = action.payload;
+      if (!state.isUsingRecommendations) {
+        state.filteredProducts = action.payload;
+        // if there are any preset filters in state, reapply them
+        productSlice.caseReducers.applyFilters(state);
+      }
     },
     setCurrentProduct: (state, action) => {
       state.currentProduct = action.payload;

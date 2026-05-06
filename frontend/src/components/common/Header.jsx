@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { 
-  Search, 
-  ShoppingCart, 
-  User, 
-  Menu, 
-  X, 
-  Sun, 
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  Sun,
   Moon,
   LogOut,
   Settings,
@@ -18,7 +18,7 @@ import { toggleCart } from '../../store/slices/cartSlice';
 import { toggleDarkMode } from '../../store/slices/themeSlice';
 import { setSearchQuery, setRecommendedProducts } from '../../store/slices/productSlice';
 import { recommendService } from '../../services/recommendService';
-import { productService, API_BASE as PRODUCT_API_BASE } from '../../services/productService';
+import { productService, API_HOST as PRODUCT_API_HOST } from '../../services/productService';
 import { searchHistoryService } from '../../services/searchHistoryService';
 import SearchHistoryDropdown from '../common/SearchHistoryDropdown';
 import { useAuth } from '../../hooks/useAuth';
@@ -69,7 +69,7 @@ const Header = () => {
         category: '',
         brand: '',
         images: [
-          `${PRODUCT_API_BASE.replace(/\/$/, '')}/images/${encodeURIComponent(rec.uid)}`
+          `${PRODUCT_API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(rec.uid)}.jpg`
         ],
       }));
 
@@ -101,7 +101,7 @@ const Header = () => {
     }
 
     // Save search to history (backend if auth, otherwise local fallback)
-    try { await searchHistoryService.saveSearch(k); } catch (e) {}
+    try { await searchHistoryService.saveSearch(k); } catch (e) { }
 
     navigate('/products');
     setSearchQueryLocal('');
@@ -163,26 +163,26 @@ const Header = () => {
                   type="text"
                   placeholder="Search products..."
                   value={searchQuery}
-                    onChange={(e) => { setSearchQueryLocal(e.target.value); setShowHistory(true); }}
-                    onFocus={async () => {
-                      try {
-                        const h = await searchHistoryService.getSearchHistory();
-                        setHistory(h);
-                        setShowHistory(true);
-                      } catch (err) {
-                        setHistory([]);
-                      }
-                    }}
-                    ref={inputRef}
+                  onChange={(e) => { setSearchQueryLocal(e.target.value); setShowHistory(true); }}
+                  onFocus={async () => {
+                    try {
+                      const h = await searchHistoryService.getSearchHistory();
+                      setHistory(h);
+                      setShowHistory(true);
+                    } catch (err) {
+                      setHistory([]);
+                    }
+                  }}
+                  ref={inputRef}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                  <SearchHistoryDropdown
-                    items={history}
-                    query={searchQuery}
-                    visible={showHistory && history.length >= 0}
-                    onSelect={(val) => performSearch(val)}
-                    onClear={async () => { await searchHistoryService.clearSearchHistory(); setHistory([]); setShowHistory(false); }}
-                  />
+                <SearchHistoryDropdown
+                  items={history}
+                  query={searchQuery}
+                  visible={showHistory && history.length >= 0}
+                  onSelect={(val) => performSearch(val)}
+                  onClear={async () => { await searchHistoryService.clearSearchHistory(); setHistory([]); setShowHistory(false); }}
+                />
               </div>
             </form>
           </div>

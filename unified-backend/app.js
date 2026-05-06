@@ -17,8 +17,8 @@ const app = express();
 // CORS Configuration
 // ==========================================
 const allowedOrigins = (
-  process.env.FRONTEND_URLS || 
-  process.env.FRONTEND_URL || 
+  process.env.FRONTEND_URLS ||
+  process.env.FRONTEND_URL ||
   'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:3000'
 )
   .split(',')
@@ -50,7 +50,7 @@ app.use(cookieParser());
 // Static File Serving (Local Images)
 // ==========================================
 // ✅ REFACTORED: Serve product images from local storage
-const PRODUCT_IMAGES_DIR = 'D:\\col pro ep\\E-commerce-project\\Product_db';
+const PRODUCT_IMAGES_DIR = 'C:\\Users\\arnab\\OneDrive\\Desktop\\Final Year Project\\E_commerce_website\\E-commerce-project\\Product_db';
 app.use('/images', express.static(PRODUCT_IMAGES_DIR, {
   maxAge: '1d', // Cache images for 1 day in browser
   etag: false   // Disable ETags for simpler caching
