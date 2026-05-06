@@ -2,8 +2,9 @@ import api from './api';
 
 const placeholderImage = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='%23ddd'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%23666' font-size='24'>Product</text></svg>";
 
-// Build image URLs from API base when DB stores filenames.
+// API_BASE is used for REST endpoints; API_HOST is used for direct static image access.
 export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const API_HOST = API_BASE.replace(/\/api\/?$/, '');
 
 const mapProduct = (p) => {
   let images = [];
@@ -15,15 +16,18 @@ const mapProduct = (p) => {
       // If the image field is already a full URL, return it
       if (/^https?:\/\//i.test(img)) return img;
 
-      // Otherwise assume it's a filename and construct a URL using the product UID
-      const uid = p._id || p.id || p.u_id || '';
-      return `${API_BASE.replace(/\/$/, '')}/images/${encodeURIComponent(uid)}/${encodeURIComponent(img)}`;
+      // Otherwise assume it's a filename
+      const cleanImg = img.replace(/^\/?(images\/)?/, '');
+      return `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(cleanImg)}`;
     });
+  } else if (p.imageUrl) {
+    const cleanImgUrl = p.imageUrl.replace(/^\/?(images\/)?/, '');
+    images = [/^https?:\/\//i.test(p.imageUrl) ? p.imageUrl : `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(cleanImgUrl)}`];
   } else if (p.u_id) {
     // Fallback: use u_id to look for product image in Product_db
-    // Example: u_id="6ZYYRKYT" maps to /api/images/6ZYYRKYT -> Product_db/6ZYYRKYT.jpg
+    // Example: u_id="6ZYYRKYT" maps to /images/6ZYYRKYT.jpg
     images = [
-      `${API_BASE.replace(/\/$/, '')}/images/${encodeURIComponent(p.u_id)}`
+      `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(p.u_id)}.jpg`
     ];
   } else {
     images = [placeholderImage];
@@ -73,7 +77,7 @@ export const productService = {
 
   searchProducts: async (keyword) => {
     try {
-      const response = await api.get('/products/search', { params: { keyword }, withCredentials: true, headers: { Accept: 'application/json' } });
+      const response = await api.get('/products', { params: { search: keyword }, withCredentials: false, headers: { Accept: 'application/json' } });
       const data = response.data?.data || [];
       return data.map(mapProduct);
     } catch (_) {
