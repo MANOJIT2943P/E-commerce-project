@@ -31,10 +31,18 @@ export const getCart = async (req, res) => {
     }
 
     // Populate product details
-    await cart.getCartWithDetails();
+    await cart.populate('items.product', 'name price description imageUrl category brand stock');
 
-    // Calculate totals
-    const totals = await cart.getCartTotals();
+    // Calculate totals inline from already-populated data
+    let totalPrice = 0;
+    let itemCount = 0;
+    cart.items.forEach((item) => {
+      if (item.product && item.product.price) {
+        totalPrice += item.product.price * item.quantity;
+        itemCount += item.quantity;
+      }
+    });
+    const totals = { itemCount, totalPrice: parseFloat(totalPrice.toFixed(2)) };
 
     res.status(200).json({
       success: true,
@@ -161,10 +169,18 @@ export const addToCart = async (req, res) => {
     await cart.save();
 
     // Populate product details for response
-    await cart.getCartWithDetails();
+    await cart.populate('items.product', 'name price description imageUrl category brand stock');
 
-    // Calculate totals
-    const totals = await cart.getCartTotals();
+    // Calculate totals inline from already-populated data
+    let totalPrice = 0;
+    let itemCount = 0;
+    cart.items.forEach((item) => {
+      if (item.product && item.product.price) {
+        totalPrice += item.product.price * item.quantity;
+        itemCount += item.quantity;
+      }
+    });
+    const totals = { itemCount, totalPrice: parseFloat(totalPrice.toFixed(2)) };
 
     res.status(200).json({
       success: true,
@@ -241,10 +257,18 @@ export const removeFromCart = async (req, res) => {
     await cart.save();
 
     // Populate product details for response
-    await cart.getCartWithDetails();
+    await cart.populate('items.product', 'name price description imageUrl category brand stock');
 
-    // Calculate totals
-    const totals = await cart.getCartTotals();
+    // Calculate totals inline from already-populated data
+    let totalPrice = 0;
+    let itemCount = 0;
+    cart.items.forEach((item) => {
+      if (item.product && item.product.price) {
+        totalPrice += item.product.price * item.quantity;
+        itemCount += item.quantity;
+      }
+    });
+    const totals = { itemCount, totalPrice: parseFloat(totalPrice.toFixed(2)) };
 
     res.status(200).json({
       success: true,
@@ -354,10 +378,18 @@ export const updateCartItem = async (req, res) => {
     await cart.save();
 
     // Populate product details for response
-    await cart.getCartWithDetails();
+    await cart.populate('items.product', 'name price description imageUrl category brand stock');
 
-    // Calculate totals
-    const totals = await cart.getCartTotals();
+    // Calculate totals inline from already-populated data
+    let totalPrice = 0;
+    let itemCount = 0;
+    cart.items.forEach((item) => {
+      if (item.product && item.product.price) {
+        totalPrice += item.product.price * item.quantity;
+        itemCount += item.quantity;
+      }
+    });
+    const totals = { itemCount, totalPrice: parseFloat(totalPrice.toFixed(2)) };
 
     res.status(200).json({
       success: true,

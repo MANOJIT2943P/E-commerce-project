@@ -10,14 +10,7 @@ const ProductCard = ({ product, viewMode }) => {
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
-
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.images[0],
-      quantity: 1,
-    });
+    addItem(product.id, 1);
     toast.success(`${product.name} added to cart!`);
   };
 

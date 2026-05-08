@@ -122,12 +122,13 @@ const CartSidebar = () => {
                         src={
                           item.product.imageUrl
                             ? `http://localhost:5000${item.product.imageUrl}`
-                            : 'https://via.placeholder.com/64'
+                            : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Cpath d='M20 24h4l2-4h12l2 4h4a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2V26a2 2 0 0 1 2-2zm12 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z' fill='%239ca3af'/%3E%3C/svg%3E`
                         }
                         alt={item.product.name}
                         className="w-16 h-16 object-cover rounded-lg bg-gray-200 dark:bg-gray-700"
                         onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/64';
+                          e.target.onerror = null;
+                          e.target.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23e5e7eb'/%3E%3Cpath d='M20 24h4l2-4h12l2 4h4a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H20a2 2 0 0 1-2-2V26a2 2 0 0 1 2-2zm12 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z' fill='%239ca3af'/%3E%3C/svg%3E`;
                         }}
                       />
 
