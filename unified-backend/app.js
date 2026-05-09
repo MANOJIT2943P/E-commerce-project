@@ -50,7 +50,7 @@ app.use(cookieParser());
 // Static File Serving (Local Images)
 // ==========================================
 // ✅ REFACTORED: Serve product images from local storage
-const PRODUCT_IMAGES_DIR = 'C:\\Users\\arnab\\OneDrive\\Desktop\\Final Year Project\\E_commerce_website\\E-commerce-project\\Product_db';
+const PRODUCT_IMAGES_DIR = process.env.PRODUCT_IMAGES_DIR;
 app.use('/images', express.static(PRODUCT_IMAGES_DIR, {
   maxAge: '1d', // Cache images for 1 day in browser
   etag: false   // Disable ETags for simpler caching

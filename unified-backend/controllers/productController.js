@@ -99,22 +99,30 @@ export const getAllProducts = async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortObj)
-      .select('-createdBy -updatedBy -minStockLevel -images') // Exclude sensitive fields
+      .select('-createdBy -updatedBy -minStockLevel') // Exclude sensitive fields, but keep images & imageUrl
       .lean(); // Use lean() for better performance on large datasets
 
     // Map to public response format
-    const productsData = products.map((product) => ({
-      id: product._id,
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      brand: product.brand,
-      stock: product.stock,
-      imageUrl: product.imageUrl,
-      hasStock: product.stock > 0,
-      createdAt: product.createdAt
-    }));
+    const productsData = products.map((product) => {
+      // Build images array: use provided images, or fallback to imageUrl
+      let images = product.images && product.images.length > 0 
+        ? product.images 
+        : (product.imageUrl ? [product.imageUrl] : []);
+      
+      return {
+        id: product._id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        category: product.category,
+        brand: product.brand,
+        stock: product.stock,
+        imageUrl: product.imageUrl,
+        images: images,
+        hasStock: product.stock > 0,
+        createdAt: product.createdAt
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -181,7 +189,9 @@ export const getProductById = async (req, res) => {
       brand: product.brand,
       stock: product.stock,
       imageUrl: product.imageUrl,
-      images: product.images || [],
+      images: product.images && product.images.length > 0 
+        ? product.images 
+        : (product.imageUrl ? [product.imageUrl] : []),
       hasStock: product.stock > 0,
       metadata: product.metadata || {},
       createdAt: product.createdAt,

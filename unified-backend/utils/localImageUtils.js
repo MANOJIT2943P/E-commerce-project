@@ -7,7 +7,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-const PRODUCT_IMAGES_DIR = 'D:\\col pro ep\\E-commerce-project\\Product_db';
+const PRODUCT_IMAGES_DIR = process.env.PRODUCT_IMAGES_DIR;
 
 /**
  * Get relative image path from filename
