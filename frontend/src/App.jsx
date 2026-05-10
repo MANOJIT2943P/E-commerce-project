@@ -17,6 +17,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Orders from './pages/Orders';
 
 // Admin Pages
 import AdminDashboard from './pages/AdminDashboard';
@@ -77,6 +78,7 @@ function App() {
               <Route path="/products/:id" element={<ProductView />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders" element={<Orders />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
               

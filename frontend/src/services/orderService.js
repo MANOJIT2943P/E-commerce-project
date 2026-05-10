@@ -66,13 +66,8 @@ export const orderService = {
     });
   },
 
-  getUserOrders: async (userId) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const userOrders = mockOrders.filter(order => order.userId === userId);
-        resolve(userOrders);
-      }, 500);
-    });
+  getUserOrders: async () => {
+    return api.get('/orders/my-orders').then(res => res.data);
   },
 
   getOrder: async (orderId) => {
