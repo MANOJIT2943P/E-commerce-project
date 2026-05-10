@@ -189,10 +189,9 @@ const orderSchema = new mongoose.Schema(
 
 /**
  * Indexes for performance optimization
+ * Note: user, orderStatus, paymentStatus are already indexed via `index: true` in the schema field definitions.
  */
-orderSchema.index({ user: 1, createdAt: -1 }); // User's orders by date
-orderSchema.index({ orderStatus: 1 }); // Query by status
-orderSchema.index({ paymentStatus: 1 }); // Query by payment status
+orderSchema.index({ user: 1, createdAt: -1 }); // Compound index: user's orders by date
 orderSchema.index({ createdAt: -1 }); // Recent orders
 orderSchema.index({ 'items.product': 1 }); // Find orders containing specific product
 

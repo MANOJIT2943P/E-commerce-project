@@ -4,16 +4,19 @@
  * Local file storage configuration - replaced Cloudinary
  */
 
+import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import multer from 'multer';
 import path from 'path';
+
+dotenv.config();
 
 // ==========================================
 // CONFIGURATION CONSTANTS
 // ==========================================
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit per file
-const PRODUCT_IMAGES_DIR = 'D:\\col pro ep\\E-commerce-project\\Product_db';
+const PRODUCT_IMAGES_DIR = process.env.PRODUCT_IMAGES_DIR;
 
 // ==========================================
 // CREATE UPLOAD DIRECTORY

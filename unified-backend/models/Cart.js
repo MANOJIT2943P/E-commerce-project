@@ -55,8 +55,8 @@ const cartSchema = new mongoose.Schema(
 
 /**
  * Indexes for performance
+ * Note: user is already indexed via `unique: true` + `index: true` in the field definition.
  */
-cartSchema.index({ user: 1 }); // User lookup
 cartSchema.index({ 'items.product': 1 }); // Product lookup in items
 cartSchema.index({ updatedAt: -1 }); // Recent carts
 

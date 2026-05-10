@@ -1,3 +1,5 @@
+import api from './api';
+
 // Mock orders for development
 let mockOrders = [
   {
@@ -95,6 +97,10 @@ export const orderService = {
         }
       }, 500);
     });
+  },
+
+  checkout: async (checkoutData) => {
+    return api.post('/orders/checkout', checkoutData).then(res => res.data);
   },
 
   getAllOrders: async () => {
