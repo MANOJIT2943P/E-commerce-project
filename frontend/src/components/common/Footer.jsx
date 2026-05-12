@@ -6,13 +6,7 @@ const Footer = () => {
   const footerSections = [
     {
       title: 'Shop',
-      links: [
-        { name: 'All Products', href: '/products' },
-        { name: 'Electronics', href: '/products?category=Electronics' },
-        { name: 'Clothing', href: '/products?category=Clothing' },
-        { name: 'Home & Kitchen', href: '/products?category=Home & Kitchen' },
-        { name: 'Furniture', href: '/products?category=Furniture' },
-      ],
+      links: [{ name: 'All Products', href: '/products' }],
     },
     {
       title: 'Customer Service',
