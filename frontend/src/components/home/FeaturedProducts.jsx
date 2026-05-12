@@ -52,6 +52,16 @@ const FeaturedProducts = () => {
   }, []);
 
   const handleAddToCart = (product) => {
+    // Check if product ID is a valid MongoDB ObjectId (24 hex characters)
+    const isValidProductId = (id) => {
+      return /^[a-f\d]{24}$/i.test(id);
+    };
+
+    if (!isValidProductId(product.id)) {
+      toast.error('This product cannot be added to cart');
+      return;
+    }
+
     addItem(product.id, 1);
     toast.success(`${product.name} added to cart!`);
   };

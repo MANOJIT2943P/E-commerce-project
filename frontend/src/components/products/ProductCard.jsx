@@ -7,9 +7,21 @@ import toast from 'react-hot-toast';
 const ProductCard = ({ product, viewMode }) => {
   const { addItem } = useCart();
 
+  // Check if product ID is a valid MongoDB ObjectId (24 hex characters)
+  const isValidProductId = (id) => {
+    return /^[a-f\d]{24}$/i.test(id);
+  };
+
+  const canAddToCart = product.inStock && isValidProductId(product.id);
+  const canViewProduct = isValidProductId(product.id);
+
   const handleAddToCart = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!canAddToCart) {
+      toast.error('This product cannot be added to cart');
+      return;
+    }
     addItem(product.id, 1);
     toast.success(`${product.name} added to cart!`);
   };
@@ -97,15 +109,17 @@ const ProductCard = ({ product, viewMode }) => {
                     </button>
                     <Link
                       to={`/products/${product.id}`}
-                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors"
-                      title="Quick View"
+                      className="p-2 text-gray-400 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={canViewProduct ? "Quick View" : "Product details not available"}
+                      onClick={(e) => !canViewProduct && e.preventDefault()}
                     >
                       <Eye className="w-5 h-5" />
                     </Link>
                     <button
                       onClick={handleAddToCart}
-                      disabled={!product.inStock}
+                      disabled={!canAddToCart}
                       className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                      title={!canAddToCart ? 'Product not available for purchase' : 'Add to Cart'}
                     >
                       Add to Cart
                     </button>
@@ -124,21 +138,30 @@ const ProductCard = ({ product, viewMode }) => {
     <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 group overflow-hidden">
       {/* Product Image */}
       <div className="relative overflow-hidden">
-        <Link to={`/products/${product.id}`}>
+        {canViewProduct ? (
+          <Link to={`/products/${product.id}`}>
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+            />
+          </Link>
+        ) : (
           <img
             src={product.images[0]}
             alt={product.name}
-            className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-64 object-cover cursor-not-allowed opacity-75"
+            title="Product details not available"
           />
-        </Link>
+        )}
 
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
           <button
             onClick={handleAddToCart}
-            disabled={!product.inStock}
+            disabled={!canAddToCart}
             className="p-2 bg-white rounded-full text-gray-900 hover:bg-blue-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            title="Add to Cart"
+            title={!canAddToCart ? 'Product not available for purchase' : 'Add to Cart'}
           >
             <ShoppingCart className="w-5 h-5" />
           </button>
