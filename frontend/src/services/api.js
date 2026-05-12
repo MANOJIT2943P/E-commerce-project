@@ -65,7 +65,11 @@ api.interceptors.response.use(
         const response = await axios.post(
           `${API_BASE_URL}/auth/refresh-token`,
           {},
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            // Add a custom header to identify this as a background refresh
+            headers: { 'X-Background-Refresh': 'true' }
+          }
         );
 
         const { accessToken } = response.data;
@@ -82,9 +86,20 @@ api.interceptors.response.use(
         // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, logout the user
+        // Silently handle refresh failures in the background
         processQueue(refreshError, null);
+        
+        // If it's a 401, we just logout without propagating a scary error message
+        // to the UI unless it's a direct user action
         store.dispatch(logout());
+        
+        // Only reject if it wasn't a "missing token" background error
+        const isMissingToken = refreshError.response?.data?.message === 'No refresh token provided';
+        if (isMissingToken) {
+          console.warn('[API] Session expired: No refresh token found.');
+          return Promise.resolve(); // Resolve silently to prevent toast errors
+        }
+        
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

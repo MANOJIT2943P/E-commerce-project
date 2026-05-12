@@ -10,6 +10,25 @@ import { ROLES } from '../constants/roles.js';
 import User from '../models/User.js';
 
 /**
+ * Cookie configuration for authentication
+ * Standardized across all auth operations
+ */
+const getCookieOptions = (isClearing = false) => {
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    path: '/',
+  };
+  
+  if (!isClearing) {
+    options.maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+  }
+  
+  return options;
+};
+
+/**
  * POST /api/auth/register
  * Register a new user
  */
@@ -36,7 +55,9 @@ export const register = async (req, res) => {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, 'i') } 
+    });
     if (existingUser) {
       return res.status(409).json({
         success: false,
@@ -49,7 +70,7 @@ export const register = async (req, res) => {
       name,
       email,
       passwordHash: password, // Will be hashed by pre-save middleware
-      role: ROLES.USER // Default role
+      role: ROLES.USER
     });
 
     await user.save();
@@ -75,16 +96,11 @@ export const register = async (req, res) => {
     await user.save();
 
     // Set refresh token in HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
-    });
+    res.cookie('refreshToken', refreshToken, getCookieOptions());
 
-    res.status(201).json({
+    res.status(201).json({ 
       success: true,
-      message: AUTH_MESSAGES.REGISTRATION_SUCCESS,
+      message: AUTH_MESSAGES.REGISTER_SUCCESS,
       accessToken: token,
       user: {
         id: user._id,
@@ -94,7 +110,7 @@ export const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Register error:', error);
+    console.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to register user'
@@ -120,10 +136,15 @@ export const login = async (req, res) => {
 
     const { email, password } = req.body;
 
+    console.log(`[DEBUG] Login attempt for email: ${email}`);
+
     // Find user by email and select password field
-    const user = await User.findOne({ email }).select('+passwordHash');
+    const user = await User.findOne({ 
+      email: { $regex: new RegExp(`^${email}$`, 'i') } 
+    }).select('+passwordHash');
 
     if (!user) {
+      console.warn(`[DEBUG] Login failed: User not found for email ${email}`);
       return res.status(401).json({
         success: false,
         message: AUTH_MESSAGES.INVALID_PASSWORD
@@ -134,6 +155,7 @@ export const login = async (req, res) => {
     const isPasswordValid = await user.comparePassword(password);
 
     if (!isPasswordValid) {
+      console.warn(`[DEBUG] Login failed: Incorrect password for email ${email}`);
       return res.status(401).json({
         success: false,
         message: AUTH_MESSAGES.INVALID_PASSWORD
@@ -153,6 +175,10 @@ export const login = async (req, res) => {
       req.ip || req.connection.remoteAddress,
       req.headers['user-agent']
     );
+
+    if (user.role === ROLES.ADMIN) {
+      console.log(`[AUTH] Admin login successful: ${user.email}`);
+    }
 
     // Generate token
     const token = generateToken({
@@ -180,12 +206,7 @@ export const login = async (req, res) => {
     await user.save();
 
     // Set refresh token in HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
-    });
+    res.cookie('refreshToken', refreshToken, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -265,6 +286,7 @@ export const refreshToken = async (req, res) => {
     const refreshTokenFromCookie = req.cookies.refreshToken;
 
     if (!refreshTokenFromCookie) {
+      console.warn('[AUTH] Refresh token attempt with no cookie present');
       return res.status(401).json({
         success: false,
         message: 'No refresh token provided'
@@ -334,12 +356,7 @@ export const refreshToken = async (req, res) => {
     await user.save();
 
     // Set new refresh token in HTTP-only cookie
-    res.cookie('refreshToken', newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    res.cookie('refreshToken', newRefreshToken, getCookieOptions());
 
     res.status(200).json({
       success: true,
@@ -384,11 +401,7 @@ export const logout = async (req, res) => {
     }
 
     // Clear refresh token cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    });
+    res.clearCookie('refreshToken', getCookieOptions(true));
 
     res.status(200).json({
       success: true,
@@ -426,11 +439,7 @@ export const logoutAll = async (req, res) => {
     await user.save();
 
     // Clear refresh token cookie
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    });
+    res.clearCookie('refreshToken', getCookieOptions(true));
 
     res.status(200).json({
       success: true,
@@ -466,8 +475,7 @@ export const registerValidation = [
 
   body('email')
     .isEmail()
-    .withMessage(AUTH_MESSAGES.INVALID_EMAIL)
-    .normalizeEmail(),
+    .withMessage(AUTH_MESSAGES.INVALID_EMAIL),
 
   body('password')
     .isLength({ min: 6 })
@@ -486,8 +494,7 @@ export const registerValidation = [
 export const loginValidation = [
   body('email')
     .isEmail()
-    .withMessage(AUTH_MESSAGES.INVALID_EMAIL)
-    .normalizeEmail(),
+    .withMessage(AUTH_MESSAGES.INVALID_EMAIL),
 
   body('password')
     .notEmpty()

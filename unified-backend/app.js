@@ -26,15 +26,29 @@ const allowedOrigins = (
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
+    
+    // Check if origin is localhost or 127.0.0.1
     const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
     if (isLocalhost) return callback(null, true);
+    
+    // Check against allowed origins from .env
     if (allowedOrigins.includes(origin)) return callback(null, true);
+    
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Accept', 
+    'X-Requested-With', 
+    'X-HTTP-Method-Override',
+    'Cookie'
+  ],
+  exposedHeaders: ['Set-Cookie']
 };
 
 app.use(cors(corsOptions));
@@ -45,6 +59,18 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+
+// Debug middleware to log cookies (Development only)
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    if (req.cookies && Object.keys(req.cookies).length > 0) {
+      console.log(`[DEBUG] Cookies received for ${req.method} ${req.path}:`, 
+        Object.keys(req.cookies).map(k => `${k}=${k === 'refreshToken' ? '[HIDDEN]' : req.cookies[k]}`).join(', ')
+      );
+    }
+    next();
+  });
+}
 
 // ==========================================
 // Static File Serving (Local Images)
