@@ -19,6 +19,7 @@ import { toggleDarkMode } from '../../store/slices/themeSlice';
 import { setSearchQuery, setRecommendedProducts } from '../../store/slices/productSlice';
 import { recommendService } from '../../services/recommendService';
 import { productService, API_HOST as PRODUCT_API_HOST } from '../../services/productService';
+import { mergeSearchAndRecommendations } from '../../utils/mergeSearchAndRecommendations';
 import { searchHistoryService } from '../../services/searchHistoryService';
 import SearchHistoryDropdown from '../common/SearchHistoryDropdown';
 import { useAuth } from '../../hooks/useAuth';
@@ -56,43 +57,8 @@ const Header = () => {
         })
       ]);
 
-      // Map recommendations to product-like format (include image using u_id)
-      const mappedRecs = (recResults || []).map((rec) => ({
-        id: rec.uid,
-        name: rec.name,
-        price: rec.original_price,
-        originalPrice: rec.original_price,
-        rating: rec.rating,
-        reviewCount: 0,
-        inStock: true,
-        description: '',
-        category: '',
-        brand: '',
-        images: [
-          `${PRODUCT_API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(rec.uid)}.jpg`
-        ],
-      }));
-
-      // dbResults are already mapped by productService.searchProducts
       const dbList = dbResults || [];
-
-      // Combine: put recommendations first, then DB results that are not already included
-      const seen = new Set();
-      const combined = [];
-
-      for (const p of mappedRecs) {
-        if (!seen.has(String(p.id))) {
-          seen.add(String(p.id));
-          combined.push(p);
-        }
-      }
-
-      for (const p of dbList) {
-        if (!seen.has(String(p.id))) {
-          seen.add(String(p.id));
-          combined.push(p);
-        }
-      }
+      const combined = mergeSearchAndRecommendations(dbList, recResults, PRODUCT_API_HOST);
 
       // Dispatch combined results to the store (use recommendedProducts slot)
       dispatch(setRecommendedProducts(combined));

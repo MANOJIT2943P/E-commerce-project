@@ -24,10 +24,13 @@ export const cartService = {
    * @returns {Object} { success, message, cart }
    */
   addToCart: async (productId, quantity) => {
-    return api.post('/cart', {
-      productId,
-      quantity
-    }).then(res => res.data);
+    const id = productId != null ? String(productId).trim() : '';
+    return api
+      .post('/cart', {
+        productId: id,
+        quantity
+      })
+      .then((res) => res.data);
   },
 
   /**

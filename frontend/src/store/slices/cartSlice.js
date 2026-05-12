@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import toast from 'react-hot-toast';
 import { cartService } from '../../services/cartService';
 
 /**
@@ -23,7 +24,7 @@ export const fetchCart = createAsyncThunk(
 
 export const addToCartAsync = createAsyncThunk(
   'cart/addToCart',
-  async ({ productId, quantity }, { rejectWithValue }) => {
+  async ({ productId, quantity, suppressSuccessToast: _suppress }, { rejectWithValue }) => {
     try {
       const response = await cartService.addToCart(productId, quantity);
       if (response.success) {
@@ -140,10 +141,25 @@ const cartSlice = createSlice({
         state.loading = false;
         state.items = action.payload.items || [];
         state.totals = action.payload.totals || { itemCount: 0, totalPrice: 0 };
+        if (action.meta.arg.suppressSuccessToast) {
+          return;
+        }
+        const productId = String(action.meta.arg.productId || '');
+        const match = (action.payload.items || []).find(
+          (i) => String(i.product?.id) === productId
+        );
+        const name = match?.product?.name || 'Product';
+        if (productId) {
+          toast.success(`${name} added to cart · Product ID: ${productId}`);
+        }
       })
       .addCase(addToCartAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        const msg = action.payload;
+        if (msg != null && msg !== '') {
+          toast.error(typeof msg === 'string' ? msg : String(msg));
+        }
       });
 
     // Remove from cart

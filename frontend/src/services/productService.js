@@ -39,8 +39,9 @@ const mapProduct = (p) => {
   const price = typeof p.price === 'number' ? p.price : (typeof p.original_price === 'number' ? p.original_price : undefined);
   const originalPrice = typeof p.original_price === 'number' ? p.original_price : (typeof p.metadata?.originalPrice === 'number' ? p.metadata.originalPrice : undefined);
   const category = p.category || p['product type'] || '';
+  const rawId = p._id ?? p.id ?? p.u_id;
   return {
-    id: p._id || p.id || p.u_id,
+    id: rawId != null && rawId !== '' ? String(rawId) : '',
     name: p.name,
     description: p.description || '',
     price,
