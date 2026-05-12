@@ -18,22 +18,17 @@ const FeaturedProducts = () => {
         // Try to fetch recommended products for a popular seed
         const recommended = await recommendService.getRecommendations('iPhone');
         const mapped = recommended.map((r) => {
-          const mongoId = r._id != null ? String(r._id) : r.id != null ? String(r.id) : '';
-          const uid = r.uid != null ? String(r.uid) : '';
-          const price = typeof r.price === 'number' ? r.price : r.original_price;
-          const stock = typeof r.stock === 'number' ? r.stock : undefined;
           return {
-            id: mongoId,
+            id: r.uid,
             name: r.name,
-            price,
-            originalPrice: typeof r.original_price === 'number' ? r.original_price : price,
+            price: r.original_price, // the recommend service returns original_price
+            originalPrice: r.original_price,
             rating: r.rating || 4.5,
             brand: r.brand || 'Recommended',
             description: r.description || 'Special featured product recommended for you.',
             images: [
-              `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(uid || mongoId)}.jpg`
+              `${API_HOST.replace(/\/$/, '')}/images/${encodeURIComponent(r.uid)}.jpg`
             ],
-            inStock: typeof stock === 'number' ? stock > 0 : true,
             isRecommended: true
           };
         });
@@ -68,6 +63,7 @@ const FeaturedProducts = () => {
     }
 
     addItem(product.id, 1);
+    toast.success(`${product.name} added to cart!`);
   };
 
   if (isLoading) {

@@ -137,12 +137,6 @@ const CartSidebar = () => {
                         <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
                           {item.product.name}
                         </h4>
-                        <p
-                          className="text-xs font-mono text-gray-500 dark:text-gray-400 truncate"
-                          title="Product ID sent to the server"
-                        >
-                          ID: {String(item.product.id)}
-                        </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 truncate">
                           {item.product.category}
                         </p>

@@ -37,7 +37,7 @@ export const getAllProducts = async (req, res) => {
     const skip = (page - 1) * limit;
 
     // Build filters object
-    const filters = { isActive: { $ne: false } }; // Active or legacy docs without isActive field
+    const filters = { isActive: true }; // Only return active products
 
     // Category filter
     if (req.query.category && req.query.category.trim()) {
@@ -74,9 +74,8 @@ export const getAllProducts = async (req, res) => {
     }
 
     // Text search filter (searches in name and description)
-    const searchTrimmed = req.query.search && req.query.search.trim();
-    if (searchTrimmed) {
-      filters.$text = { $search: searchTrimmed };
+    if (req.query.search && req.query.search.trim()) {
+      filters.$text = { $search: req.query.search.trim() };
     }
 
     // Build sort object
@@ -84,44 +83,24 @@ export const getAllProducts = async (req, res) => {
     if (req.query.sort) {
       const sortField = req.query.sort.trim();
       if (sortField.startsWith('-')) {
+        // Descending order
         sortObj = { [sortField.substring(1)]: -1 };
       } else {
+        // Ascending order
         sortObj = { [sortField]: 1 };
       }
     }
 
-    const fetchProductPage = async (queryFilters) => {
-      const totalCount = await Product.countDocuments(queryFilters);
-      const rows = await Product.find(queryFilters)
-        .skip(skip)
-        .limit(limit)
-        .sort(sortObj)
-        .select('-createdBy -updatedBy -minStockLevel')
-        .lean();
-      return { totalCount, rows };
-    };
+    // Get total count for pagination
+    const total = await Product.countDocuments(filters);
 
-    let total;
-    let products;
-
-    try {
-      ({ totalCount: total, rows: products } = await fetchProductPage(filters));
-    } catch (err) {
-      // Common dev issue: no text index on name/description — fall back to regex search
-      if (searchTrimmed && filters.$text) {
-        console.warn('[getAllProducts] $text search failed; retrying with regex:', err.message);
-        const fallbackFilters = { ...filters };
-        delete fallbackFilters.$text;
-        const escaped = searchTrimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        fallbackFilters.$or = [
-          { name: { $regex: escaped, $options: 'i' } },
-          { description: { $regex: escaped, $options: 'i' } }
-        ];
-        ({ totalCount: total, rows: products } = await fetchProductPage(fallbackFilters));
-      } else {
-        throw err;
-      }
-    }
+    // Fetch products
+    const products = await Product.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort(sortObj)
+      .select('-createdBy -updatedBy -minStockLevel') // Exclude sensitive fields, but keep images & imageUrl
+      .lean(); // Use lean() for better performance on large datasets
 
     // Map to public response format
     const productsData = products.map((product) => {
@@ -185,10 +164,10 @@ export const getProductById = async (req, res) => {
       });
     }
 
-    // Find products that are available for purchase (not explicitly deactivated)
+    // Find only active products
     const product = await Product.findOne({
       _id: id,
-      isActive: { $ne: false }
+      isActive: true
     })
       .select('-createdBy -updatedBy -minStockLevel')
       .lean();
@@ -255,7 +234,7 @@ export const getSearchSuggestions = async (req, res) => {
     // Get distinct product names matching the search
     const suggestions = await Product.find(
       {
-        isActive: { $ne: false },
+        isActive: true,
         name: { $regex: searchQuery, $options: 'i' }
       },
       { name: 1 }
@@ -287,7 +266,7 @@ export const getSearchSuggestions = async (req, res) => {
  */
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Product.distinct('category', { isActive: { $ne: false } });
+    const categories = await Product.distinct('category', { isActive: true });
 
     res.status(200).json({
       success: true,
@@ -310,7 +289,7 @@ export const getCategories = async (req, res) => {
  */
 export const getBrands = async (req, res) => {
   try {
-    const brands = await Product.distinct('brand', { isActive: { $ne: false } });
+    const brands = await Product.distinct('brand', { isActive: true });
 
     res.status(200).json({
       success: true,

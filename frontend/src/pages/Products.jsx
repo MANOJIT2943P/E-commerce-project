@@ -149,7 +149,6 @@ const Products = () => {
                     key={product.id}
                     product={product}
                     viewMode={viewMode}
-                    fromSearchContext={Boolean(searchQuery?.trim()) || isUsingRecommendations}
                   />
                 ))}
               </div>

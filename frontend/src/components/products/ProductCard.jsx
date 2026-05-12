@@ -4,7 +4,7 @@ import { Star, ShoppingCart, Heart, Eye } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 import toast from 'react-hot-toast';
 
-const ProductCard = ({ product, viewMode, fromSearchContext = false }) => {
+const ProductCard = ({ product, viewMode }) => {
   const { addItem } = useCart();
 
   // Check if product ID is a valid MongoDB ObjectId (24 hex characters)
@@ -22,23 +22,8 @@ const ProductCard = ({ product, viewMode, fromSearchContext = false }) => {
       toast.error('This product cannot be added to cart');
       return;
     }
-    if (fromSearchContext) {
-      toast.success(
-        <div className="text-sm text-left max-w-xs">
-          <div className="font-semibold text-gray-900 dark:text-white">Product ID</div>
-          <div className="font-mono text-xs break-all mt-1 text-gray-800 dark:text-gray-100">
-            {String(product.id)}
-          </div>
-          <div className="text-xs mt-2 text-gray-600 dark:text-gray-400">
-            {product.name} — adding to cart…
-          </div>
-        </div>,
-        { duration: 6000 }
-      );
-      addItem(product.id, 1, { suppressSuccessToast: true });
-      return;
-    }
     addItem(product.id, 1);
+    toast.success(`${product.name} added to cart!`);
   };
 
   if (viewMode === 'list') {
@@ -251,7 +236,7 @@ const ProductCard = ({ product, viewMode, fromSearchContext = false }) => {
 
           <button
             onClick={handleAddToCart}
-            disabled={!canAddToCart}
+            disabled={!product.inStock}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
           >
             Add to Cart

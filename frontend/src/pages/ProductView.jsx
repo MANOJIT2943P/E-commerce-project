@@ -70,6 +70,7 @@ const ProductView = () => {
     }
 
     addItem(product.id, 1);
+    toast.success(`${product.name} added to cart!`);
   };
 
   if (isLoading) return <LoadingSpinner size="large" className="py-20" />;

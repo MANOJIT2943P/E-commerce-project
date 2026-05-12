@@ -21,14 +21,8 @@ export const useCart = () => {
     }
   }, [token, user, dispatch]);
 
-  const addItem = (productId, quantity = 1, options = {}) => {
-    dispatch(
-      addToCartAsync({
-        productId,
-        quantity,
-        suppressSuccessToast: Boolean(options.suppressSuccessToast),
-      })
-    );
+  const addItem = (productId, quantity = 1) => {
+    dispatch(addToCartAsync({ productId, quantity }));
   };
 
   const removeItem = (productId) => {
