@@ -86,10 +86,13 @@ export const getCart = async (req, res) => {
 export const addToCart = async (req, res) => {
   try {
     const userId = req.user.id; // Set by auth middleware
-    const { productId, quantity } = req.body;
+    const { productId: rawProductId, quantity: rawQuantity } = req.body;
 
-    // Validate input
-    if (!productId || !quantity) {
+    const productId =
+      typeof rawProductId === 'string' ? rawProductId.trim() : String(rawProductId || '').trim();
+    const quantity = Number.parseInt(String(rawQuantity), 10);
+
+    if (!productId || !Number.isFinite(quantity)) {
       return res.status(400).json({
         success: false,
         message: 'Product ID and quantity are required'
@@ -103,29 +106,41 @@ export const addToCart = async (req, res) => {
       });
     }
 
-    if (quantity <= 0 || !Number.isInteger(quantity)) {
+    if (quantity < 1 || !Number.isInteger(quantity)) {
       return res.status(400).json({
         success: false,
         message: 'Quantity must be a positive integer'
       });
     }
 
-    // Check if product exists and is in stock
-    const product = await Product.findOne({ _id: productId, isActive: true });
+    const product = await Product.findById(productId);
 
     if (!product) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
-        message: PRODUCT_MESSAGES.NOT_FOUND
+        message: `${PRODUCT_MESSAGES.PRODUCT_NOT_FOUND} No product exists with this id.`,
+        code: 'PRODUCT_NOT_IN_CATALOG'
       });
     }
 
+    if (product.isActive === false) {
+      return res.status(403).json({
+        success: false,
+        message:
+          'This product exists in the database but is deactivated (isActive: false), so it cannot be added to the cart. Set isActive to true in MongoDB or via the admin panel.',
+        code: 'PRODUCT_INACTIVE'
+      });
+    }
+
+    const availableStock =
+      typeof product.stock === 'number' && !Number.isNaN(product.stock) ? product.stock : 0;
+
     // Check stock availability
-    if (product.stock < quantity) {
+    if (availableStock < quantity) {
       return res.status(400).json({
         success: false,
-        message: `Only ${product.stock} items available in stock`,
-        availableStock: product.stock
+        message: `Only ${availableStock} items available in stock`,
+        availableStock
       });
     }
 
@@ -140,20 +155,18 @@ export const addToCart = async (req, res) => {
     }
 
     // Add or update item
-    const existingItem = cart.items.find(
-      (item) => item.product.toString() === productId
-    );
+    const existingItem = cart.items.find((item) => item.product.toString() === productId);
 
     if (existingItem) {
       const newQuantity = existingItem.quantity + quantity;
 
       // Check if new quantity exceeds stock
-      if (newQuantity > product.stock) {
+      if (newQuantity > availableStock) {
         return res.status(400).json({
           success: false,
-          message: `Cannot add ${quantity} more items. Only ${product.stock - existingItem.quantity} additional items available`,
+          message: `Cannot add ${quantity} more items. Only ${availableStock - existingItem.quantity} additional items available`,
           currentQuantity: existingItem.quantity,
-          availableToAdd: product.stock - existingItem.quantity
+          availableToAdd: availableStock - existingItem.quantity
         });
       }
 
@@ -339,7 +352,7 @@ export const updateCartItem = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: PRODUCT_MESSAGES.NOT_FOUND
+        message: PRODUCT_MESSAGES.PRODUCT_NOT_FOUND
       });
     }
 
