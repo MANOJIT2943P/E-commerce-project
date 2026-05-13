@@ -76,16 +76,6 @@ export const productService = {
     }
   },
 
-  searchProducts: async (keyword) => {
-    try {
-      const response = await api.get('/products', { params: { search: keyword }, withCredentials: false, headers: { Accept: 'application/json' } });
-      const data = response.data?.data || [];
-      return data.map(mapProduct);
-    } catch (_) {
-      return [];
-    }
-  },
-
   getProductsByCategory: async (category, params = {}) => {
     try {
       const response = await api.get('/products', { params: { ...params, category }, withCredentials: false, headers: { Accept: 'application/json' } });

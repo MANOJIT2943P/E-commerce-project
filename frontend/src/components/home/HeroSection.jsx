@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setSearchQuery, setRecommendedProducts } from '../../store/slices/productSlice';
 import { recommendService } from '../../services/recommendService';
-import { productService, API_HOST as PRODUCT_API_HOST } from '../../services/productService';
+import { API_HOST as PRODUCT_API_HOST } from '../../services/productService';
 import { mergeSearchAndRecommendations } from '../../utils/mergeSearchAndRecommendations';
 import { searchHistoryService } from '../../services/searchHistoryService';
 import SearchHistoryDropdown from '../common/SearchHistoryDropdown';
@@ -141,20 +141,12 @@ function SearchForm() {
     dispatch(setSearchQuery(keyword));
 
     try {
-      // Fetch DB search results and recommendations in parallel
-      const [dbResults, recResults] = await Promise.all([
-        productService.searchProducts(keyword).catch(err => {
-          console.error('DB search failed:', err);
-          return [];
-        }),
-        recommendService.getRecommendations(keyword).catch(err => {
-          console.error('Recommend fetch failed:', err);
-          return [];
-        })
-      ]);
+      const recResults = await recommendService.getRecommendations(keyword).catch(err => {
+        console.error('Recommend fetch failed:', err);
+        return [];
+      });
 
-      const dbList = dbResults || [];
-      const combined = mergeSearchAndRecommendations(dbList, recResults, PRODUCT_API_HOST);
+      const combined = mergeSearchAndRecommendations([], recResults, PRODUCT_API_HOST);
 
       // Dispatch combined results to the store (use recommendedProducts slot)
       dispatch(setRecommendedProducts(combined));
