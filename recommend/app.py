@@ -63,7 +63,7 @@ def recommend(product_name: str):
     # ─── Step 4: Build recommendations ──────────────────────────────
     prod_list = sorted(
         list(enumerate(dis)), reverse=True, key=lambda x: x[1]
-    )[1:6]
+    )[:15]
 
     recommendations = []
     for i in prod_list:
