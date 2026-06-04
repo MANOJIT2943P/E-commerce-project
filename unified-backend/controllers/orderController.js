@@ -9,6 +9,7 @@ import { ROLES } from '../constants/roles.js';
 import Cart from '../models/Cart.js';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
+import { sendOrderConfirmationEmail } from '../utils/emailService.js';
 
 /**
  * POST /api/orders/checkout
@@ -184,7 +185,13 @@ export const checkout = async (req, res) => {
     await session.commitTransaction();
 
     // ==========================================
-    // STEP 11: Return success response
+    // STEP 11: Send order confirmation email (async, non-blocking)
+    // ==========================================
+    sendOrderConfirmationEmail(order, customerContact.email, customerContact)
+      .catch(err => console.error('Error sending confirmation email:', err));
+
+    // ==========================================
+    // STEP 12: Return success response
     // ==========================================
     res.status(201).json({
       success: true,
