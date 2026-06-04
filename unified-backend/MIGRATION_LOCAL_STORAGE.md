@@ -20,7 +20,7 @@
  * - Requires Cloudinary API credentials in .env
  * 
  * AFTER (Local Storage):
- * - Images stored in: D:\col pro ep\E-commerce-project\Product_db
+ * - Images stored in: D:\pro\E-commerce-project\Product_db
  * - Image paths stored in MongoDB (e.g., /images/product_<timestamp>_<random>.jpg)
  * - No imagePublicId field needed
  * - No external dependencies for image hosting
@@ -93,7 +93,7 @@
  * - Example: /images/product_1694890234_987654321.jpg
  * 
  * FILESYSTEM LOCATION:
- * - Physical file path: D:\col pro ep\E-commerce-project\Product_db\product_.._.jpg
+ * - Physical file path: D:\pro\E-commerce-project\Product_db\product_.._.jpg
  * - No subdirectories needed
  * 
  * HTTP SERVING:
@@ -144,7 +144,7 @@
 
 /*
  * HARDCODED IN MIDDLEWARE:
- * - Product images directory: D:\col pro ep\E-commerce-project\Product_db
+ * - Product images directory: D:\pro\E-commerce-project\Product_db
  * - Max file size: 5 MB per image
  * - Allowed MIME types: image/jpeg, image/png, image/webp
  * - Cache control: 1 day browser cache
@@ -235,7 +235,7 @@
  *    - Image deleted from disk
  * 
  * 6. Check disk storage:
- *    ls D:\col pro ep\E-commerce-project\Product_db
+ *    ls D:\pro ep\E-commerce-project\Product_db
  *    - Should see files like: product_1694890234_987654321.jpg
  */
 

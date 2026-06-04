@@ -106,8 +106,7 @@ const userSchema = new mongoose.Schema(
         },
         createdAt: {
           type: Date,
-          default: Date.now,
-          expires: 604800 // 7 days in seconds
+          default: Date.now
         }
       }
     ],
@@ -206,6 +205,18 @@ userSchema.methods.recordLogin = async function (ipAddress = '', userAgent = '')
     timestamp: new Date()
   });
   
+  await this.save();
+};
+
+/**
+ * Remove expired refresh tokens (older than 7 days)
+ * Call this method to manually clean up old tokens
+ */
+userSchema.methods.cleanupExpiredTokens = async function () {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  this.refreshTokens = this.refreshTokens.filter(
+    (rt) => rt.createdAt > sevenDaysAgo
+  );
   await this.save();
 };
 
