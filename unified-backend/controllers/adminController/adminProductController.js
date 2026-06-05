@@ -219,7 +219,7 @@ export const updateProductAdmin = async (req, res) => {
       });
     }
 
-    const { name, description, price, category, brand, images, isActive, deleteImage } = req.body;
+    const { name, description, price, category, brand, stock, images, isActive, deleteImage } = req.body;
     uploadedFile = req.file;
 
     // Get existing product to check for old image
@@ -242,6 +242,7 @@ export const updateProductAdmin = async (req, res) => {
       price,
       category,
       brand,
+      stock: stock ? parseInt(stock) : existingProduct.stock,
       images,
       isActive,
       updatedBy: req.user.id
